@@ -52,7 +52,8 @@ public class PullRefreshLayout extends ViewGroup implements NestedScrollingParen
 
     //-------------------------START| values part |START-----------------------------
 
-    private int srollOverDistance = 100;
+    private int scrollOverTopDistance = 100;
+    private int scrollOverBottomDistance = 100;
 
     /**
      * trigger distance
@@ -439,9 +440,9 @@ public class PullRefreshLayout extends ViewGroup implements NestedScrollingParen
                 ListViewCompat.scrollListBy((ListView) pullContentLayout, currScrollOffset);
             }
 
-            if (!isOverScrollTrigger && !isTargetAbleScrollUp() && currScrollOffset < 0 && moveDistance >= 0) {
+            if (!isOverScrollTrigger && !isTargetAbleScrollUp() && currScrollOffset < 0 && moveDistance >= scrollOverTopDistance) {
                 overScrollDell(1, currScrollOffset);
-            } else if (!isOverScrollTrigger && !isTargetAbleScrollDown() && currScrollOffset > 0 && moveDistance <= 0) {
+            } else if (!isOverScrollTrigger && !isTargetAbleScrollDown() && currScrollOffset > 0 && -moveDistance >= scrollOverBottomDistance) {
                 overScrollDell(2, currScrollOffset);
             }
 
@@ -451,32 +452,24 @@ public class PullRefreshLayout extends ViewGroup implements NestedScrollingParen
     }
 
     private boolean scrollOver(int currScrollOffset) {
-        if (!isTargetAbleScrollUp() && currScrollOffset < 0 && moveDistance < srollOverDistance) {
+        if (!isTargetAbleScrollUp() && currScrollOffset < 0 && moveDistance < scrollOverBottomDistance
+                || !isTargetAbleScrollDown() && currScrollOffset > 0 && -moveDistance < scrollOverTopDistance) {
             dellScroll(-currScrollOffset);
             ViewCompat.postInvalidateOnAnimation(this);
             return true;
         }
-        if (pullTwinkEnable && (overScrollFlingState() == 1 || overScrollFlingState() == 2) && overScrollBackDell(overScrollFlingState(), currScrollOffset)) {
-            return true;
-        }
-        Log.e("scrollOver", "scrollOver: " + currScrollOffset);
-        return false;
-    }
 
-    /**
-     * overScroll Back Dell
-     *
-     * @param tempDistance temp move distance
-     * @return need continue
-     */
-    private boolean overScrollBackDell(int type, int tempDistance) {
-        if ((type == 1 && finalScrollDistance > moveDistance * 2) || (type == 2 && finalScrollDistance < moveDistance * 2)) {
+        final int type = overScrollFlingState();
+        if (type != 1 && type != 2) {
+            return false;
+        }
+        if (Math.abs(finalScrollDistance) > Math.abs(moveDistance * 2)) {
             cancelAllAnimation();
-            if ((type == 1 && moveDistance <= tempDistance) || (type == 2 && moveDistance >= tempDistance)) {
+            if ((type == 1 && moveDistance <= currScrollOffset) || (type == 2 && moveDistance >= currScrollOffset)) {
                 dellScroll(-moveDistance);
-                return kindsOfViewsToNormalDell(type, tempDistance);
+                return kindsOfViewsToNormalDell(type, currScrollOffset);
             }
-            dellScroll(-tempDistance);
+            dellScroll(-currScrollOffset);
             return false;
         } else {
             abortScroller();
@@ -525,7 +518,7 @@ public class PullRefreshLayout extends ViewGroup implements NestedScrollingParen
     private void startOverScrollAnimation(int type, int distanceMove) {
         distanceMove = type == 1 ? Math.max(-topOverScrollMaxTriggerOffset, distanceMove) : Math.min(bottomOverScrollMaxTriggerOffset, distanceMove);
 
-        int finalDistance = scroller.getFinalY() - scroller.getCurrY();
+        final int finalDistance = scroller.getFinalY() - scroller.getCurrY();
         abortScroller();
         cancelAllAnimation();
 
@@ -723,9 +716,9 @@ public class PullRefreshLayout extends ViewGroup implements NestedScrollingParen
             return;
         }
         if (resetHeaderAnimator == null) {
-            resetHeaderAnimator = getAnimator(headerViewHeight, 0, headerAnimationUpdate, resetHeaderAnimationListener, readyMainInterpolator());
+            resetHeaderAnimator = getAnimator(headerViewHeight, scrollOverTopDistance, headerAnimationUpdate, resetHeaderAnimationListener, readyMainInterpolator());
         } else {
-            resetHeaderAnimator.setIntValues(headerViewHeight, 0);
+            resetHeaderAnimator.setIntValues(headerViewHeight, scrollOverTopDistance);
         }
         resetHeaderAnimator.setDuration(resetAnimationDuring);
         resetHeaderAnimator.start();
@@ -770,9 +763,9 @@ public class PullRefreshLayout extends ViewGroup implements NestedScrollingParen
             return;
         }
         if (resetFooterAnimator == null) {
-            resetFooterAnimator = getAnimator(loadMoreViewHeight, 0, footerAnimationUpdate, resetFooterAnimationListener, readyMainInterpolator());
+            resetFooterAnimator = getAnimator(loadMoreViewHeight, -scrollOverBottomDistance, footerAnimationUpdate, resetFooterAnimationListener, readyMainInterpolator());
         } else {
-            resetFooterAnimator.setIntValues(loadMoreViewHeight, 0);
+            resetFooterAnimator.setIntValues(loadMoreViewHeight, -scrollOverBottomDistance);
         }
         resetFooterAnimator.setDuration(resetAnimationDuring);
         resetFooterAnimator.start();
