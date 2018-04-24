@@ -14,6 +14,8 @@
         <attr name="prl_pullUpMaxDistance" format="dimension" />
         <attr name="prl_topOverScrollMaxTriggerOffset" format="dimension" />
         <attr name="prl_downOverScrollMaxTriggerOffset" format="dimension" />
+        <attr name="prl_scrollOverTopDistance" format="dimension" />
+        <attr name="prl_scrollOverBottomDistance" format="dimension" />
 
         <attr name="prl_resetAnimationDuring" format="integer" />
         <attr name="prl_refreshAnimationDuring" format="integer" />
