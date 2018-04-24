@@ -432,17 +432,19 @@ public class PullRefreshLayout extends ViewGroup implements NestedScrollingParen
             int currScrollOffset = currY - lastScrollY;
             lastScrollY = currY;
 
+            if (!isOverScrollTrigger && !isTargetAbleScrollUp() && currScrollOffset < 0 && moveDistance >= scrollOverTopDistance) {
+                overScrollDell(1, currScrollOffset);
+                return;
+            } else if (!isOverScrollTrigger && !isTargetAbleScrollDown() && currScrollOffset > 0 && -moveDistance >= scrollOverBottomDistance) {
+                overScrollDell(2, currScrollOffset);
+                return;
+            }
+
             if (scrollOver(currScrollOffset)) {
                 return;
             } else if (isScrollAbleViewBackScroll && (pullContentLayout instanceof ListView)) {
                 // ListView scroll back scroll to normal
                 ListViewCompat.scrollListBy((ListView) pullContentLayout, currScrollOffset);
-            }
-
-            if (!isOverScrollTrigger && !isTargetAbleScrollUp() && currScrollOffset < 0 && moveDistance >= scrollOverTopDistance) {
-                overScrollDell(1, currScrollOffset);
-            } else if (!isOverScrollTrigger && !isTargetAbleScrollDown() && currScrollOffset > 0 && -moveDistance >= scrollOverBottomDistance) {
-                overScrollDell(2, currScrollOffset);
             }
 
             // invalidate View ,the method invalidate() sometimes not work , so i use ViewCompat.postInvalidateOnAnimation(this) instead of invalidate()
@@ -454,8 +456,7 @@ public class PullRefreshLayout extends ViewGroup implements NestedScrollingParen
         if (!isTargetAbleScrollUp() && currScrollOffset < 0 && moveDistance <= scrollOverTopDistance
                 || !isTargetAbleScrollDown() && currScrollOffset > 0 && -moveDistance <= scrollOverBottomDistance) {
             dellScroll(-currScrollOffset);
-            ViewCompat.postInvalidateOnAnimation(this);
-            return true;
+            return false;
         }
 
         final int type = overScrollFlingState();
