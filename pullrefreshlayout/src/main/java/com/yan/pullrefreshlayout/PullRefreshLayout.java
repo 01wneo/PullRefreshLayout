@@ -434,13 +434,9 @@ public class PullRefreshLayout extends ViewGroup implements NestedScrollingParen
 
             if (!isOverScrollTrigger && !isTargetAbleScrollUp() && currScrollOffset < 0 && moveDistance >= scrollOverTopDistance) {
                 overScrollDell(1, currScrollOffset);
-                return;
             } else if (!isOverScrollTrigger && !isTargetAbleScrollDown() && currScrollOffset > 0 && -moveDistance >= scrollOverBottomDistance) {
                 overScrollDell(2, currScrollOffset);
-                return;
-            }
-
-            if (scrollOver(currScrollOffset)) {
+            } else if (scrollOver(currScrollOffset)) {
                 return;
             } else if (isScrollAbleViewBackScroll && (pullContentLayout instanceof ListView)) {
                 // ListView scroll back scroll to normal

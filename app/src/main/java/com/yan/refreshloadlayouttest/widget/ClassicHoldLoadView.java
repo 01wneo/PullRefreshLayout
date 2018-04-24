@@ -53,6 +53,8 @@ public class ClassicHoldLoadView extends FrameLayout implements PullRefreshLayou
             public void run() {
                 final View target = refreshLayout.getTargetView();
                 refreshLayout.setLoadTriggerDistance(tv.getHeight());
+                refreshLayout.setScrollOverBottomDistance(tv.getHeight());
+
                 target.setOverScrollMode(OVER_SCROLL_NEVER);
                 ((ViewGroup) target).setClipToPadding(false);
 
@@ -98,6 +100,7 @@ public class ClassicHoldLoadView extends FrameLayout implements PullRefreshLayou
         loadingView.setIndicatorColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
         refreshLayout.setAnimationMainInterpolator(new ViscousInterpolator());
         refreshLayout.setAnimationOverScrollInterpolator(new LinearInterpolator());
+        refreshLayout.setClipChildren(false);
     }
 
     // 动画初始化
@@ -112,8 +115,6 @@ public class ClassicHoldLoadView extends FrameLayout implements PullRefreshLayou
             @Override
             public void onAnimationEnd(Animator animation) {
                 refreshLayout.loadMoreComplete();
-                refreshLayout.setDispatchTouchAble(true);
-                refreshLayout.cancelTouchEvent();
                 loadingView.smoothToHide();
             }
         });
@@ -125,23 +126,13 @@ public class ClassicHoldLoadView extends FrameLayout implements PullRefreshLayou
         final int moveDistance = refreshLayout.getMoveDistance();
         if (moveDistance >= 0) {// moveDistance大于等于0时不主动处理
             refreshLayout.loadMoreComplete();
-            refreshLayout.setDispatchTouchAble(true);
             loadingView.smoothToHide();
             return;
         }
 
-        // 阻止refreshLayout的事件分发
-        refreshLayout.setDispatchTouchAble(false);
         postDelayed(new Runnable() {
             @Override
             public void run() {
-                // 设置事件为ACTION_CANCEL
-                refreshLayout.cancelTouchEvent();
-                // 再设置内容移动到0的位置
-                refreshLayout.moveChildren(0);
-                refreshLayout.getTargetView().scrollBy(0, -moveDistance);
-
-                // 调用自定义footer动画
                 animationInit();
 
                 objectAnimator.setFloatValues(getHeight() + moveDistance, getHeight());
@@ -159,7 +150,6 @@ public class ClassicHoldLoadView extends FrameLayout implements PullRefreshLayou
             loadingView.setVisibility(GONE);
             if (isHold) {
                 ViewGroup target = refreshLayout.getTargetView();
-                target.setPadding(0, 0, 0, tv.getHeight());//方便起见，这里就不考虑设置target已设置的情况
 
                 if (refreshLayout.getMoveDistance() < 0) {
                     int offsetY = Math.min(tv.getHeight(), -refreshLayout.getMoveDistance());
@@ -174,7 +164,6 @@ public class ClassicHoldLoadView extends FrameLayout implements PullRefreshLayou
 
     public void holdReset() {
         ViewGroup target = refreshLayout.getTargetView();
-        target.setPadding(0, 0, 0, 0);
         refreshLayout.setLoadMoreEnable(true);
         refreshLayout.setAutoLoadingEnable(true);
     }
@@ -240,6 +229,7 @@ public class ClassicHoldLoadView extends FrameLayout implements PullRefreshLayou
             tv.setText("loading...");
         }
     }
+
     @Override
     public void onPullFinish(boolean flag) {
         if (refreshLayout.isLoadMoreEnable()) {
