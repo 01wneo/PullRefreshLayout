@@ -10,6 +10,7 @@ import com.yan.refreshloadlayouttest.testactivity.CommonActivity1;
 import com.yan.refreshloadlayouttest.testactivity.CommonActivity2;
 import com.yan.refreshloadlayouttest.testactivity.CommonActivity3;
 import com.yan.refreshloadlayouttest.testactivity.CommonActivity4;
+import com.yan.refreshloadlayouttest.testactivity.CommonActivity5;
 import com.yan.refreshloadlayouttest.testactivity.DiDiActivity;
 import com.yan.refreshloadlayouttest.testactivity.DiDiListViewActivity;
 import com.yan.refreshloadlayouttest.testactivity.NestedActivity;
@@ -62,6 +63,9 @@ public class OptionActivity extends BaseActivity {
                             break;
                         case 10:
                             startActivity(new Intent(getBaseContext(), DiDiListViewActivity.class));
+                            break;
+                        case 11:
+                            startActivity(new Intent(getBaseContext(), CommonActivity5.class));
                             break;
                     }
                 }

@@ -58,6 +58,7 @@
         <activity
             android:name=".testactivity.DiDiListViewActivity"
             android:label="@string/title_activity_tab"></activity>
+        <activity android:name=".testactivity.CommonActivity5" />
     </application>
 
 </manifest>
